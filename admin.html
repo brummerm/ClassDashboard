@@ -1,0 +1,754 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Dashboard Admin | BPHS CS</title>
+<style>
+  *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+    background: #f4f6f8;
+    color: #0d1117;
+    min-height: 100vh;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  /* ── LOGIN ── */
+  #login-screen {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 100vh;
+    background: #0d1117;
+  }
+
+  .login-card {
+    background: #161b22;
+    border: 1px solid #30363d;
+    border-radius: 12px;
+    padding: 40px 36px;
+    width: 100%;
+    max-width: 380px;
+  }
+
+  .login-logo {
+    font-size: 26px;
+    font-weight: 800;
+    color: #e6edf3;
+    margin-bottom: 3px;
+  }
+
+  .login-sub {
+    font-size: 13px;
+    color: #7d8590;
+    margin-bottom: 28px;
+  }
+
+  .login-card label {
+    display: block;
+    font-size: 12px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: #7d8590;
+    margin-bottom: 6px;
+  }
+
+  .login-card input {
+    width: 100%;
+    padding: 10px 14px;
+    background: #0d1117;
+    border: 1px solid #30363d;
+    border-radius: 6px;
+    color: #e6edf3;
+    font-size: 15px;
+    outline: none;
+    transition: border-color 0.15s;
+    margin-bottom: 14px;
+  }
+
+  .login-card input:focus { border-color: #388bfd; }
+
+  .btn-login {
+    width: 100%;
+    padding: 11px;
+    background: #238636;
+    border: 1px solid #2ea043;
+    border-radius: 6px;
+    color: #fff;
+    font-size: 15px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background 0.15s;
+  }
+
+  .btn-login:hover { background: #2ea043; }
+
+  #login-error {
+    color: #f85149;
+    font-size: 13px;
+    margin-top: 10px;
+    text-align: center;
+    display: none;
+  }
+
+  /* ── ADMIN SHELL ── */
+  #admin-panel { display: none; }
+
+  .admin-nav {
+    background: #161b22;
+    border-bottom: 1px solid #30363d;
+    padding: 14px 28px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+  }
+
+  .nav-brand  { font-size: 15px; font-weight: 700; color: #e6edf3; }
+  .nav-hint   { font-size: 12px; color: #7d8590; margin-top: 1px; }
+  .nav-right  { display: flex; align-items: center; gap: 14px; }
+
+  .nav-link {
+    color: #388bfd;
+    text-decoration: none;
+    font-size: 13px;
+    font-weight: 500;
+  }
+  .nav-link:hover { text-decoration: underline; }
+
+  .btn-sm {
+    padding: 6px 14px;
+    font-size: 13px;
+    font-weight: 600;
+    border-radius: 6px;
+    border: 1px solid #30363d;
+    background: #21262d;
+    color: #e6edf3;
+    cursor: pointer;
+    transition: background 0.15s;
+  }
+  .btn-sm:hover { background: #30363d; }
+
+  /* ── FILE PROTOCOL WARNING ── */
+  .file-warning {
+    background: #fff8c5;
+    border-bottom: 1px solid #e3b341;
+    padding: 10px 28px;
+    font-size: 13px;
+    color: #633700;
+    display: none;
+  }
+
+  .file-warning code {
+    background: rgba(0,0,0,0.08);
+    padding: 1px 5px;
+    border-radius: 3px;
+    font-family: monospace;
+    font-size: 12px;
+  }
+
+  /* ── 2-COLUMN LAYOUT (mirrors dashboard hierarchy) ── */
+  .admin-body {
+    max-width: 1100px;
+    margin: 0 auto;
+    padding: 22px 20px 60px;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    grid-template-areas:
+      "notes    checklist"
+      "video    password";
+    gap: 18px;
+    align-items: start;
+  }
+
+  .area-notes     { grid-area: notes; }
+  .area-checklist { grid-area: checklist; }
+  .area-video     { grid-area: video; }
+  .area-password  { grid-area: password; }
+
+  /* ── CARDS ── */
+  .card {
+    background: #fff;
+    border: 1px solid #d0d7de;
+    border-radius: 10px;
+    overflow: hidden;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.06);
+  }
+
+  .card-header {
+    padding: 13px 18px;
+    background: #f6f8fa;
+    border-bottom: 1px solid #d0d7de;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+  }
+
+  .card-title { font-size: 14px; font-weight: 700; color: #24292f; }
+
+  .card-body { padding: 18px; }
+
+  /* ── FORM CONTROLS ── */
+  textarea.ctrl, input.ctrl {
+    width: 100%;
+    padding: 9px 12px;
+    border: 1px solid #d0d7de;
+    border-radius: 6px;
+    background: #fff;
+    color: #24292f;
+    font-size: 14px;
+    font-family: inherit;
+    outline: none;
+    transition: border-color 0.15s, box-shadow 0.15s;
+  }
+
+  textarea.ctrl {
+    min-height: 200px;
+    resize: vertical;
+    line-height: 1.65;
+  }
+
+  textarea.ctrl:focus, input.ctrl:focus {
+    border-color: #0969da;
+    box-shadow: 0 0 0 3px rgba(9,105,218,0.12);
+  }
+
+  .hint { font-size: 12px; color: #57606a; margin-top: 6px; }
+
+  /* ── BUTTONS ── */
+  .btn {
+    padding: 7px 16px;
+    font-size: 13px;
+    font-weight: 600;
+    border-radius: 6px;
+    border: none;
+    cursor: pointer;
+    transition: background 0.15s;
+    line-height: 1.4;
+    white-space: nowrap;
+  }
+
+  .btn-green { background: #2da44e; color: #fff; }
+  .btn-green:hover { background: #238636; }
+  .btn-blue  { background: #0969da; color: #fff; }
+  .btn-blue:hover  { background: #0550ae; }
+  .btn-gray  { background: #6e7781; color: #fff; }
+  .btn-gray:hover  { background: #57606a; }
+
+  /* ── CHECKLIST EDITOR ── */
+  #cl-list { display: grid; gap: 7px; margin-bottom: 12px; min-height: 40px; }
+
+  .cl-item {
+    display: flex;
+    align-items: center;
+    gap: 9px;
+    padding: 7px 10px;
+    background: #f6f8fa;
+    border: 1px solid #d0d7de;
+    border-radius: 6px;
+  }
+
+  .cl-item input[type="checkbox"] {
+    width: 15px;
+    height: 15px;
+    cursor: pointer;
+    accent-color: #2da44e;
+    flex-shrink: 0;
+  }
+
+  .cl-item input[type="text"] {
+    flex: 1;
+    padding: 4px 8px;
+    border: 1px solid #d0d7de;
+    border-radius: 4px;
+    background: #fff;
+    font-size: 14px;
+    color: #24292f;
+    outline: none;
+  }
+  .cl-item input[type="text"]:focus { border-color: #0969da; }
+
+  .del-btn {
+    width: 27px;
+    height: 27px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: #ffeef0;
+    border: 1px solid #ffcdd2;
+    border-radius: 4px;
+    color: #cf222e;
+    font-size: 17px;
+    line-height: 1;
+    cursor: pointer;
+    flex-shrink: 0;
+    transition: background 0.15s;
+    padding: 0;
+  }
+  .del-btn:hover { background: #ffcdd2; }
+
+  .add-row {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+  }
+  .add-row input { flex: 1; }
+
+  /* ── YOUTUBE PREVIEW ── */
+  .yt-preview-wrap {
+    margin-top: 12px;
+    border-radius: 8px;
+    overflow: hidden;
+    background: #1c1c1e;
+    aspect-ratio: 16/9;
+    display: none;
+    position: relative;
+  }
+
+  .yt-preview-wrap iframe {
+    width: 100%;
+    height: 100%;
+    border: none;
+    display: block;
+  }
+
+  /* Error overlay shown when YouTube blocks embedding */
+  .yt-error-overlay {
+    display: none;
+    position: absolute;
+    inset: 0;
+    background: #1c1c1e;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    padding: 24px;
+    text-align: center;
+    color: #e6edf3;
+  }
+
+  .yt-error-overlay.visible { display: flex; }
+
+  .yt-error-icon {
+    font-size: 32px;
+    line-height: 1;
+  }
+
+  .yt-error-title {
+    font-size: 16px;
+    font-weight: 700;
+    color: #f85149;
+  }
+
+  .yt-error-desc {
+    font-size: 13px;
+    color: #8b949e;
+    max-width: 320px;
+    line-height: 1.5;
+  }
+
+  .yt-open-link {
+    display: inline-block;
+    margin-top: 4px;
+    padding: 7px 16px;
+    background: #238636;
+    border-radius: 6px;
+    color: #fff;
+    text-decoration: none;
+    font-size: 13px;
+    font-weight: 600;
+    transition: background 0.15s;
+  }
+
+  .yt-open-link:hover { background: #2ea043; }
+
+  /* ── TOAST ── */
+  #toast {
+    position: fixed;
+    bottom: 24px;
+    right: 24px;
+    background: #2da44e;
+    color: #fff;
+    padding: 11px 20px;
+    border-radius: 8px;
+    font-weight: 600;
+    font-size: 14px;
+    box-shadow: 0 4px 14px rgba(0,0,0,0.18);
+    transform: translateY(80px);
+    opacity: 0;
+    transition: all 0.22s ease;
+    z-index: 9999;
+    pointer-events: none;
+  }
+  #toast.show { transform: translateY(0); opacity: 1; }
+</style>
+</head>
+<body>
+
+<!-- ══ LOGIN ══════════════════════════════════════════════════════════════════ -->
+<div id="login-screen">
+  <div class="login-card">
+    <div class="login-logo">BPHS CS Dashboard</div>
+    <div class="login-sub">Teacher / Admin Access</div>
+    <label>Password</label>
+    <input type="password" id="pw-input" placeholder="Enter admin password"
+           autocomplete="current-password">
+    <button class="btn-login" onclick="doLogin()">Sign In</button>
+    <div id="login-error">Incorrect password. Try again.</div>
+  </div>
+</div>
+
+<!-- ══ ADMIN PANEL ═════════════════════════════════════════════════════════════ -->
+<div id="admin-panel">
+
+  <nav class="admin-nav">
+    <div>
+      <div class="nav-brand">Dashboard Admin</div>
+      <div class="nav-hint">Changes appear on the board within 5 seconds</div>
+    </div>
+    <div class="nav-right">
+      <a class="nav-link" href="dashboard.html" target="_blank">View Dashboard ↗</a>
+      <button class="btn-sm" onclick="doLogout()">Sign Out</button>
+    </div>
+  </nav>
+
+  <!-- Shown only when opened as a local file (file://) — YouTube won't embed in that case -->
+  <div class="file-warning" id="file-warning">
+    <strong>⚠ Local file detected.</strong> YouTube videos won't embed when files are opened directly from your computer.
+    To fix this, run <code>python3 -m http.server 8000</code> in this folder, then open
+    <code>http://localhost:8000/admin.html</code> instead.
+  </div>
+
+  <div class="admin-body">
+
+    <!-- TOP-LEFT: Assignment Notes (mirrors dashboard top-left) ─────────────── -->
+    <div class="card area-notes">
+      <div class="card-header">
+        <span class="card-title">Assignment Notes</span>
+        <button class="btn btn-green" onclick="saveNotes()">Save Notes</button>
+      </div>
+      <div class="card-body">
+        <textarea class="ctrl" id="notes-input"
+          placeholder="Enter today's instructions, reminders, or assignment details...&#10;&#10;Line breaks are preserved on the dashboard."></textarea>
+        <div class="hint">Displays in the top-left panel. Supports plain text and line breaks.</div>
+      </div>
+    </div>
+
+    <!-- TOP-RIGHT: Checklist (mirrors dashboard top-right) ──────────────────── -->
+    <div class="card area-checklist">
+      <div class="card-header">
+        <span class="card-title">Assignment Completion Checklist</span>
+        <button class="btn btn-green" onclick="saveChecklist()">Save Checklist</button>
+      </div>
+      <div class="card-body">
+        <div id="cl-list"></div>
+        <div class="add-row">
+          <input class="ctrl" type="text" id="new-item-input"
+            placeholder="Type a step, press Enter or click Add..."
+            onkeydown="if(event.key==='Enter') addItem()">
+          <button class="btn btn-blue" onclick="addItem()">+ Add</button>
+        </div>
+        <div class="hint">Check a box to mark it done. Students see updates in real-time.</div>
+      </div>
+    </div>
+
+    <!-- BOTTOM-LEFT: Video (mirrors dashboard bottom-left) ──────────────────── -->
+    <div class="card area-video">
+      <div class="card-header">
+        <span class="card-title">Class Video</span>
+        <div style="display:flex;gap:8px;">
+          <button class="btn btn-gray" onclick="clearVideo()">Clear</button>
+          <button class="btn btn-green" onclick="saveVideo()">Set Video</button>
+        </div>
+      </div>
+      <div class="card-body">
+        <input class="ctrl" type="text" id="yt-input"
+          placeholder="Paste a YouTube URL or video ID..."
+          oninput="previewYt()">
+        <div class="hint">
+          Accepts youtube.com/watch?v=, youtu.be/, or a plain 11-character video ID.
+          Some videos block embedding — if you see an error, the owner has disabled it. Try a different video.
+        </div>
+        <div class="yt-preview-wrap" id="yt-preview">
+          <iframe id="yt-preview-iframe" allowfullscreen
+            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"></iframe>
+          <!-- Error overlay — shown when YouTube blocks embedding -->
+          <div class="yt-error-overlay" id="yt-error">
+            <div class="yt-error-icon">⚠</div>
+            <div class="yt-error-title">Video can't be embedded</div>
+            <div class="yt-error-desc" id="yt-error-desc">
+              The video owner has disabled embedding. You'll need to choose a different video.
+            </div>
+            <a class="yt-open-link" id="yt-error-link" href="#" target="_blank">
+              Open on YouTube ↗
+            </a>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- BOTTOM-RIGHT: Settings (mirrors dashboard bottom-right position) ─────── -->
+    <div class="card area-password">
+      <div class="card-header">
+        <span class="card-title">Change Password</span>
+      </div>
+      <div class="card-body" style="display:grid;gap:10px;">
+        <input class="ctrl" type="password" id="pw-new"     placeholder="New password">
+        <input class="ctrl" type="password" id="pw-confirm" placeholder="Confirm new password">
+        <div>
+          <button class="btn btn-green" onclick="changePassword()">Update Password</button>
+        </div>
+        <div class="hint">Default password is <strong>bphs</strong>. Change it after first login.</div>
+      </div>
+    </div>
+
+  </div><!-- /admin-body -->
+</div><!-- /admin-panel -->
+
+<div id="toast"></div>
+
+<script>
+'use strict';
+
+// ─── AUTH ─────────────────────────────────────────────────────────────────────
+const DEFAULT_PW  = 'bphs';
+const STORE_KEY   = 'cs_dashboard_data';
+const PW_KEY      = 'cs_admin_pw';
+const SESSION_KEY = 'cs_admin_authed';
+
+function getPw() { return localStorage.getItem(PW_KEY) || DEFAULT_PW; }
+
+function doLogin() {
+  const val = document.getElementById('pw-input').value;
+  if (val === getPw()) {
+    sessionStorage.setItem(SESSION_KEY, '1');
+    openAdmin();
+  } else {
+    document.getElementById('login-error').style.display = 'block';
+    document.getElementById('pw-input').value = '';
+    document.getElementById('pw-input').focus();
+  }
+}
+
+document.getElementById('pw-input').addEventListener('keydown', e => {
+  if (e.key === 'Enter') doLogin();
+});
+
+function doLogout() {
+  sessionStorage.removeItem(SESSION_KEY);
+  document.getElementById('admin-panel').style.display = 'none';
+  document.getElementById('login-screen').style.display = 'flex';
+  document.getElementById('pw-input').value = '';
+}
+
+function openAdmin() {
+  document.getElementById('login-screen').style.display = 'none';
+  document.getElementById('admin-panel').style.display  = 'block';
+  // Warn when running from file:// — YouTube won't embed
+  if (location.protocol === 'file:') {
+    document.getElementById('file-warning').style.display = 'block';
+  }
+  loadAdminData();
+}
+
+function changePassword() {
+  const a = document.getElementById('pw-new').value;
+  const b = document.getElementById('pw-confirm').value;
+  if (!a)           return alert('Please enter a new password.');
+  if (a.length < 3) return alert('Password must be at least 3 characters.');
+  if (a !== b)      return alert('Passwords do not match.');
+  localStorage.setItem(PW_KEY, a);
+  document.getElementById('pw-new').value     = '';
+  document.getElementById('pw-confirm').value = '';
+  toast('Password updated!');
+}
+
+if (sessionStorage.getItem(SESSION_KEY) === '1') openAdmin();
+
+// ─── DATA ─────────────────────────────────────────────────────────────────────
+function getData() {
+  try {
+    const raw = localStorage.getItem(STORE_KEY);
+    return raw ? JSON.parse(raw) : { notes: '', checklist: [], youtubeId: null };
+  } catch(e) {
+    return { notes: '', checklist: [], youtubeId: null };
+  }
+}
+
+function putData(data) {
+  localStorage.setItem(STORE_KEY, JSON.stringify(data));
+}
+
+function loadAdminData() {
+  const d = getData();
+  document.getElementById('notes-input').value = d.notes || '';
+  renderChecklist(d.checklist || []);
+  if (d.youtubeId) {
+    document.getElementById('yt-input').value = d.youtubeId;
+    showPreview(d.youtubeId);
+  }
+}
+
+// ─── NOTES ────────────────────────────────────────────────────────────────────
+function saveNotes() {
+  const d = getData();
+  d.notes = document.getElementById('notes-input').value;
+  putData(d);
+  toast('Notes saved!');
+}
+
+// ─── CHECKLIST ────────────────────────────────────────────────────────────────
+let items = [];
+
+function renderChecklist(data) {
+  items = data.map(i => ({ ...i }));
+  const list = document.getElementById('cl-list');
+
+  if (items.length === 0) {
+    list.innerHTML = '<div style="color:#57606a;font-size:13px;padding:2px 0;">No items yet. Add one below.</div>';
+    return;
+  }
+
+  list.innerHTML = items.map((item, i) => `
+    <div class="cl-item">
+      <input type="checkbox" ${item.done ? 'checked' : ''} onchange="toggleDone(${i})">
+      <input type="text" value="${esc(item.text)}" oninput="editText(${i}, this.value)">
+      <button class="del-btn" onclick="removeItem(${i})" title="Remove">&times;</button>
+    </div>
+  `).join('');
+}
+
+function toggleDone(i)  { items[i].done = !items[i].done; }
+function editText(i, v) { items[i].text = v; }
+
+function removeItem(i) {
+  items.splice(i, 1);
+  renderChecklist(items);
+}
+
+function addItem() {
+  const inp  = document.getElementById('new-item-input');
+  const text = inp.value.trim();
+  if (!text) return;
+  items.push({ id: Date.now(), text, done: false });
+  renderChecklist(items);
+  inp.value = '';
+  inp.focus();
+}
+
+function saveChecklist() {
+  const d = getData();
+  d.checklist = items;
+  putData(d);
+  toast('Checklist saved!');
+}
+
+// ─── YOUTUBE ──────────────────────────────────────────────────────────────────
+function extractId(url) {
+  if (!url) return null;
+  url = url.trim();
+  const patterns = [
+    /[?&]v=([a-zA-Z0-9_-]{11})/,
+    /youtu\.be\/([a-zA-Z0-9_-]{11})/,
+    /embed\/([a-zA-Z0-9_-]{11})/,
+    /^([a-zA-Z0-9_-]{11})$/,
+  ];
+  for (const p of patterns) {
+    const m = url.match(p);
+    if (m) return m[1];
+  }
+  return null;
+}
+
+function previewYt() {
+  const id = extractId(document.getElementById('yt-input').value);
+  if (id) { showPreview(id); }
+  else    { document.getElementById('yt-preview').style.display = 'none'; }
+}
+
+function showPreview(id) {
+  // Clear any previous error overlay
+  document.getElementById('yt-error').classList.remove('visible');
+  // Set the fallback "open on YouTube" link
+  document.getElementById('yt-error-link').href = `https://www.youtube.com/watch?v=${id}`;
+  // Build embed URL with JS API enabled so we can receive error events
+  const src = `https://www.youtube.com/embed/${id}?enablejsapi=1&rel=0`;
+  document.getElementById('yt-preview-iframe').src = src;
+  document.getElementById('yt-preview').style.display = 'block';
+}
+
+function saveVideo() {
+  const id = extractId(document.getElementById('yt-input').value);
+  if (!id) return alert('Could not find a valid YouTube video ID. Please check the URL and try again.');
+  const d = getData();
+  d.youtubeId = id;
+  putData(d);
+  showPreview(id);
+  toast('Video saved!');
+}
+
+function clearVideo() {
+  const d = getData();
+  d.youtubeId = null;
+  putData(d);
+  document.getElementById('yt-input').value             = '';
+  document.getElementById('yt-preview').style.display   = 'none';
+  document.getElementById('yt-preview-iframe').src      = '';
+  document.getElementById('yt-error').classList.remove('visible');
+  toast('Video cleared.');
+}
+
+// Listen for YouTube IFrame API error events (sent via postMessage)
+// Error codes: 2=invalid param, 100=private/deleted, 101/150/153=embedding disabled
+window.addEventListener('message', function(e) {
+  if (!e.data || typeof e.data !== 'string') return;
+  try {
+    const data = JSON.parse(e.data);
+    if (data.event !== 'onError') return;
+
+    const code = data.info;
+    let desc = 'This video cannot be embedded on this page.';
+
+    if (code === 100) {
+      desc = 'Video not found or set to private. Check the URL and try again.';
+    } else if (code === 101 || code === 150 || code === 153) {
+      desc = 'The video owner has disabled embedding. You\'ll need to choose a different video.';
+    } else if (code === 2) {
+      desc = 'Invalid video ID. Please check the URL.';
+    }
+
+    const currentId = extractId(document.getElementById('yt-input').value);
+    if (currentId) {
+      document.getElementById('yt-error-link').href = `https://www.youtube.com/watch?v=${currentId}`;
+    }
+    document.getElementById('yt-error-desc').textContent = desc;
+    document.getElementById('yt-error').classList.add('visible');
+  } catch(err) { /* not a YouTube message */ }
+});
+
+// ─── UTILS ────────────────────────────────────────────────────────────────────
+function esc(s) {
+  return String(s)
+    .replace(/&/g, '&amp;')
+    .replace(/"/g, '&quot;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;');
+}
+
+let toastTimer;
+function toast(msg) {
+  const el = document.getElementById('toast');
+  el.textContent = msg;
+  el.classList.add('show');
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => el.classList.remove('show'), 2600);
+}
+</script>
+</body>
+</html>
