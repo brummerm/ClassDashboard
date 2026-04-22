@@ -20,17 +20,22 @@
     padding: 8px;
   }
 
-  /* ── DATE / TIME HEADER ── */
+  /* ── HEADER ── */
   .header {
     background: #161b22;
     border: 1px solid #30363d;
     border-radius: 10px;
     display: flex;
     align-items: center;
-    justify-content: center;
-    gap: 32px;
+    justify-content: space-between;
     padding: 10px 24px;
     flex-shrink: 0;
+  }
+
+  .header-left {
+    display: flex;
+    align-items: baseline;
+    gap: 24px;
   }
 
   .header-time {
@@ -46,19 +51,55 @@
     font-size: 20px;
     font-weight: 500;
     color: #7d8590;
-    line-height: 1.4;
   }
 
-  /* ── FOUR EQUAL PANELS ── */
-  .panels {
+  /* Class badge — background color set dynamically via JS */
+  .class-badge {
+    border-radius: 8px;
+    padding: 8px 28px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    line-height: 1.2;
+    background: #374151;
+    color: #d1d5db;
+    transition: background-color 0.8s ease, color 0.8s ease;
+    min-width: 160px;
+    text-align: center;
+  }
+
+  .class-badge .badge-period {
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    opacity: 0.75;
+  }
+
+  .class-badge .badge-name {
+    font-size: 24px;
+    font-weight: 900;
+    text-transform: uppercase;
+    letter-spacing: 0.03em;
+  }
+
+  .class-badge .badge-time {
+    font-size: 11px;
+    opacity: 0.75;
+    margin-top: 1px;
+  }
+
+  /* ── BODY ── */
+  .body {
     display: grid;
-    grid-template-columns: repeat(2, 1fr);
-    grid-template-rows: repeat(2, 1fr);
+    grid-template-columns: 1fr 1fr;
+    grid-template-rows: 1fr 1fr;
     gap: 8px;
     flex: 1;
     min-height: 0;
   }
 
+  /* ── SHARED PANEL ── */
   .panel {
     background: #161b22;
     border: 1px solid #30363d;
@@ -68,11 +109,17 @@
     flex-direction: column;
   }
 
+  /* Notes spans both rows in the right column */
+  .panel-notes {
+    grid-column: 2;
+    grid-row: 1 / 3;
+  }
+
   .panel-header {
     padding: 8px 14px;
     background: #0d1117;
     border-bottom: 1px solid #30363d;
-    font-size: 24px;
+    font-size: 14px;
     font-weight: 700;
     text-transform: uppercase;
     letter-spacing: 0.09em;
@@ -93,7 +140,7 @@
   /* ── CHECKLIST ── */
   .checklist-empty {
     color: #7d8590;
-    font-size: 20px;
+    font-size: 15px;
   }
 
   .checklist-item {
@@ -102,7 +149,7 @@
     gap: 11px;
     padding: 9px 0;
     border-bottom: 1px solid #21262d;
-    font-size: 20px;
+    font-size: 26px;
     line-height: 1.4;
     color: #c9d1d9;
   }
@@ -134,58 +181,11 @@
 
   /* ── NOTES ── */
   .notes-text {
-    font-size: 18px;
+    font-size: 22px;
     line-height: 1.8;
     color: #c9d1d9;
     white-space: pre-wrap;
     word-break: break-word;
-  }
-
-  /* ── CLASS COLOR PANEL ── */
-  .class-panel {
-    border-radius: 10px;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    gap: 4px;
-    text-align: center;
-    padding: 20px 16px;
-    transition: background-color 0.8s ease, color 0.8s ease, border-color 0.8s ease;
-    background: #161b22;
-    border: 1px solid #30363d;
-    overflow: hidden;
-  }
-
-  .class-period-label {
-    font-size: 11px;
-    font-weight: 700;
-    text-transform: uppercase;
-    letter-spacing: 0.15em;
-    opacity: 0.7;
-  }
-
-  .class-name-big {
-    font-size: 58px;
-    font-weight: 900;
-    text-transform: uppercase;
-    letter-spacing: 0.02em;
-    line-height: 1;
-  }
-
-  .class-time-range {
-    font-size: 14px;
-    opacity: 0.8;
-    margin-top: 4px;
-  }
-
-  .class-remaining {
-    font-size: 11px;
-    opacity: 0.55;
-    font-weight: 700;
-    letter-spacing: 0.06em;
-    text-transform: uppercase;
-    margin-top: 2px;
   }
 
   /* ── YOUTUBE ── */
@@ -234,16 +234,22 @@
 </head>
 <body>
 
-<!-- DATE / TIME HEADER -->
+<!-- HEADER: time/date + class color badge -->
 <div class="header">
-  <div class="header-time" id="clock">--:-- --</div>
-  <div class="header-date" id="date-display">Loading...</div>
+  <div class="header-left">
+    <div class="header-time" id="clock">--:-- --</div>
+    <div class="header-date" id="date-display">Loading...</div>
+  </div>
+  <div class="class-badge" id="class-badge">
+    <span class="badge-period" id="badge-period">—</span>
+    <span class="badge-name"   id="badge-name">—</span>
+    <span class="badge-time"   id="badge-time"></span>
+  </div>
 </div>
 
-<!-- FOUR EQUAL PANELS -->
-<div class="panels">
+<!-- BODY: checklist top-left, video bottom-left, notes full-height right -->
+<div class="body">
 
-  <!-- Panel 1: Checklist -->
   <div class="panel">
     <div class="panel-header">Assignment Completion Checklist</div>
     <div class="panel-body" id="checklist-display">
@@ -251,15 +257,13 @@
     </div>
   </div>
 
-  <!-- Panel 2: Notes -->
-  <div class="panel">
+  <div class="panel panel-notes">
     <div class="panel-header">Assignment Notes</div>
     <div class="panel-body">
       <div class="notes-text" id="notes-display">No notes have been posted yet.</div>
     </div>
   </div>
 
-  <!-- Panel 3: YouTube -->
   <div class="panel">
     <div class="panel-header">Class Video</div>
     <div class="yt-body">
@@ -278,14 +282,6 @@
         allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
         allowfullscreen></iframe>
     </div>
-  </div>
-
-  <!-- Panel 4: Class Color / Period -->
-  <div class="class-panel" id="class-panel">
-    <div class="class-period-label" id="period-label">Period —</div>
-    <div class="class-name-big" id="class-name">—</div>
-    <div class="class-time-range" id="class-time-range"></div>
-    <div class="class-remaining" id="class-remaining"></div>
   </div>
 
 </div>
@@ -323,7 +319,7 @@ const COLOR_MAP = {
   'CL Prep': { bg: '#374151', fg: '#d1d5db' },
 };
 
-const NOCLASS = { bg: '#161b22', fg: '#7d8590', border: '#30363d' };
+const NOCLASS = { bg: '#21262d', fg: '#7d8590' };
 
 // ─── HELPERS ──────────────────────────────────────────────────────────────────
 function toMin(h, m)   { return h * 60 + m; }
@@ -343,29 +339,26 @@ function updateClock() {
     `${DAYS[now.getDay()]}, ${MONTHS[now.getMonth()]} ${now.getDate()}, ${now.getFullYear()}`;
 }
 
-// ─── CLASS PANEL ──────────────────────────────────────────────────────────────
-function updateClassPanel() {
-  const now      = new Date();
-  const dayIdx   = now.getDay();
-  const curMin   = toMin(now.getHours(), now.getMinutes());
-  const panel    = document.getElementById('class-panel');
-  const nameEl   = document.getElementById('class-name');
-  const periodEl = document.getElementById('period-label');
-  const rangeEl  = document.getElementById('class-time-range');
-  const remEl    = document.getElementById('class-remaining');
+// ─── CLASS BADGE ──────────────────────────────────────────────────────────────
+function updateClassBadge() {
+  const now    = new Date();
+  const dayIdx = now.getDay();
+  const curMin = toMin(now.getHours(), now.getMinutes());
+  const badge  = document.getElementById('class-badge');
+  const periodEl = document.getElementById('badge-period');
+  const nameEl   = document.getElementById('badge-name');
+  const timeEl   = document.getElementById('badge-time');
 
   function applyStyle(style) {
-    panel.style.backgroundColor = style.bg;
-    panel.style.color           = style.fg;
-    panel.style.borderColor     = style.border || 'transparent';
+    badge.style.backgroundColor = style.bg;
+    badge.style.color           = style.fg;
   }
 
   if (!SCHEDULE[dayIdx]) {
     applyStyle(NOCLASS);
     periodEl.textContent = 'Weekend';
     nameEl.textContent   = 'No School';
-    rangeEl.textContent  = '';
-    remEl.textContent    = '';
+    timeEl.textContent   = '';
     return;
   }
 
@@ -383,19 +376,17 @@ function updateClassPanel() {
     applyStyle(NOCLASS);
     periodEl.textContent = '—';
     nameEl.textContent   = 'No Class';
-    rangeEl.textContent  = 'Outside class hours';
-    remEl.textContent    = '';
+    timeEl.textContent   = '';
     return;
   }
 
   const { period, color, endMin } = slot;
   periodEl.textContent = `Period ${period.n}`;
-  rangeEl.textContent  = `${fmtTime(...period.s)} \u2013 ${fmtTime(...period.e)}`;
-  remEl.textContent    = `${endMin - curMin} min remaining`;
+  timeEl.textContent   = `${fmtTime(...period.s)} – ${fmtTime(...period.e)}`;
 
   if (!color) {
     applyStyle(NOCLASS);
-    nameEl.textContent = 'Free Period';
+    nameEl.textContent = 'Free';
     return;
   }
 
@@ -457,12 +448,12 @@ function loadDashboard() {
 
 // ─── INIT ─────────────────────────────────────────────────────────────────────
 updateClock();
-updateClassPanel();
+updateClassBadge();
 loadDashboard();
 
-setInterval(updateClock,       1000);
-setInterval(updateClassPanel, 30000);
-setInterval(loadDashboard,     5000);
+setInterval(updateClock,        1000);
+setInterval(updateClassBadge,  30000);
+setInterval(loadDashboard,      5000);
 
 // YouTube embed error detection
 window.addEventListener('message', function(e) {
