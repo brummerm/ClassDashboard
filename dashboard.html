@@ -273,17 +273,16 @@ const SCHEDULE = {
 };
 const COLOR_MAP = {
   'Red':     { bg: '#991b1b', fg: '#fff' },
-  'Yellow':  { bg: '#fcba03', fg: '#fff' },
+  'Yellow':  { bg: '#92400e', fg: '#fff' },
   'Blue':    { bg: '#1e40af', fg: '#fff' },
   'Green':   { bg: '#166534', fg: '#fff' },
   'Purple':  { bg: '#5b21b6', fg: '#fff' },
-  'Skills':  { bg: '#e07109', fg: '#d1d5db' },
-  'CL Prep': { bg: '#09e0e0', fg: '#d1d5db' },
+  'Skills':  { bg: '#374151', fg: '#d1d5db' },
+  'CL Prep': { bg: '#374151', fg: '#d1d5db' },
 };
 const NOCLASS = { bg: '#161b22', fg: '#e6edf3' };
 // ─── HELPERS ──────────────────────────────────────────────────────────────────
 function toMin(h, m)   { return h * 60 + m; }
-function fmtTime(h, m) { return `${h % 12 || 12}:${String(m).padStart(2,'0')} ${h >= 12 ? 'PM' : 'AM'}`; }
 function esc(s)        { return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
 // ─── CLOCK ────────────────────────────────────────────────────────────────────
 const DAYS   = ['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
@@ -304,9 +303,7 @@ function updateClassBadge() {
   const header   = document.getElementById('header');
   const periodEl = document.getElementById('badge-period');
   const nameEl   = document.getElementById('badge-name');
-  const timeEl   = document.getElementById('badge-time');
 
-  // Apply color to the entire header
   function applyStyle(style) {
     header.style.backgroundColor = style.bg;
     header.style.color           = style.fg;
@@ -317,7 +314,6 @@ function updateClassBadge() {
     applyStyle(NOCLASS);
     periodEl.textContent = 'Weekend';
     nameEl.textContent   = 'No School';
-    timeEl.textContent   = '';
     return;
   }
   let slot = null;
@@ -325,7 +321,7 @@ function updateClassBadge() {
     const p = PERIODS[i];
     const s = toMin(...p.s), e = toMin(...p.e);
     if (curMin >= s && curMin < e) {
-      slot = { period: p, color: SCHEDULE[dayIdx][i], endMin: e };
+      slot = { period: p, color: SCHEDULE[dayIdx][i] };
       break;
     }
   }
@@ -333,12 +329,10 @@ function updateClassBadge() {
     applyStyle(NOCLASS);
     periodEl.textContent = '—';
     nameEl.textContent   = 'No Class';
-    timeEl.textContent   = '';
     return;
   }
-  const { period, color, endMin } = slot;
+  const { period, color } = slot;
   periodEl.textContent = `Period ${period.n}`;
-  timeEl.textContent   = ''; // filled each second by updateCountdown
   if (!color) {
     applyStyle(NOCLASS);
     nameEl.textContent = 'Free';
@@ -378,9 +372,11 @@ function loadDashboard() {
     const raw = localStorage.getItem('cs_dashboard_data');
     if (raw) data = JSON.parse(raw);
   } catch(e) {}
+
   // Notes
   document.getElementById('notes-display').textContent =
     (data.notes && data.notes.trim()) ? data.notes : 'No notes have been posted yet.';
+
   // Checklist
   const listEl = document.getElementById('checklist-display');
   if (!data.checklist || data.checklist.length === 0) {
@@ -397,6 +393,7 @@ function loadDashboard() {
       </div>
     `).join('');
   }
+
   // YouTube — only update src when ID changes to avoid interrupting playback
   const newId = data.youtubeId || null;
   if (newId !== lastVideoId) {
@@ -422,10 +419,12 @@ updateClock();
 updateClassBadge();
 updateCountdown();
 loadDashboard();
-setInterval(updateClock,        1000);
+
+setInterval(updateClock,       1000);
 setInterval(updateCountdown,   1000);
-setInterval(updateClassBadge,  30000);
-setInterval(loadDashboard,      5000);
+setInterval(updateClassBadge, 30000);
+setInterval(loadDashboard,     5000);
+
 // YouTube embed error detection
 window.addEventListener('message', function(e) {
   if (!e.data || typeof e.data !== 'string') return;
