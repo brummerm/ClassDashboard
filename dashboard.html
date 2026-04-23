@@ -6,7 +6,6 @@
 <title>CS Class Dashboard | BPHS</title>
 <style>
   *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
-
   body {
     font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
     background: #0d1117;
@@ -19,10 +18,8 @@
     gap: 8px;
     padding: 8px;
   }
-
   /* ── HEADER ── */
   .header {
-    background: #161b22;
     border: 1px solid #30363d;
     border-radius: 10px;
     display: flex;
@@ -30,30 +27,29 @@
     justify-content: space-between;
     padding: 10px 24px;
     flex-shrink: 0;
+    background: #161b22;
+    transition: background-color 0.8s ease, border-color 0.8s ease;
   }
-
   .header-left {
     display: flex;
     align-items: baseline;
     gap: 24px;
   }
-
   .header-time {
     font-size: 60px;
     font-weight: 800;
     font-variant-numeric: tabular-nums;
     letter-spacing: -0.5px;
     line-height: 1;
-    color: #e6edf3;
+    color: inherit;
   }
-
   .header-date {
     font-size: 30px;
     font-weight: 500;
-    color: #7d8590;
+    color: inherit;
+    opacity: 0.75;
   }
-
-  /* Class badge — background color set dynamically via JS */
+  /* Class badge — sits inside the colored header */
   .class-badge {
     border-radius: 8px;
     padding: 8px 28px;
@@ -61,13 +57,11 @@
     flex-direction: column;
     align-items: center;
     line-height: 1.2;
-    background: #374151;
-    color: #d1d5db;
-    transition: background-color 0.8s ease, color 0.8s ease;
+    background: rgba(0,0,0,0.2);
+    color: inherit;
     min-width: 160px;
     text-align: center;
   }
-
   .class-badge .badge-period {
     font-size: 20px;
     font-weight: 700;
@@ -75,20 +69,17 @@
     text-transform: uppercase;
     opacity: 0.75;
   }
-
   .class-badge .badge-name {
     font-size: 34px;
     font-weight: 900;
     text-transform: uppercase;
     letter-spacing: 0.03em;
   }
-
   .class-badge .badge-time {
     font-size: 20px;
     opacity: 0.75;
     margin-top: 1px;
   }
-
   /* ── BODY ── */
   .body {
     display: grid;
@@ -98,7 +89,6 @@
     flex: 1;
     min-height: 0;
   }
-
   /* ── SHARED PANEL ── */
   .panel {
     background: #161b22;
@@ -108,13 +98,11 @@
     display: flex;
     flex-direction: column;
   }
-
   /* Notes spans both rows in the right column */
   .panel-notes {
     grid-column: 2;
     grid-row: 1 / 3;
   }
-
   .panel-header {
     padding: 8px 14px;
     background: #0d1117;
@@ -126,23 +114,19 @@
     color: #7d8590;
     flex-shrink: 0;
   }
-
   .panel-body {
     flex: 1;
     overflow-y: auto;
     padding: 14px 16px;
   }
-
   .panel-body::-webkit-scrollbar { width: 4px; }
   .panel-body::-webkit-scrollbar-track { background: transparent; }
   .panel-body::-webkit-scrollbar-thumb { background: #30363d; border-radius: 2px; }
-
   /* ── CHECKLIST ── */
   .checklist-empty {
     color: #7d8590;
     font-size: 15px;
   }
-
   .checklist-item {
     display: flex;
     align-items: flex-start;
@@ -153,9 +137,7 @@
     line-height: 1.4;
     color: #c9d1d9;
   }
-
   .checklist-item:last-child { border-bottom: none; }
-
   .check-circle {
     width: 22px;
     height: 22px;
@@ -168,17 +150,14 @@
     justify-content: center;
     transition: background 0.2s, border-color 0.2s;
   }
-
   .checklist-item.done .check-circle {
     background: #238636;
     border-color: #238636;
   }
-
   .checklist-item.done .item-text {
     text-decoration: line-through;
     color: #7d8590;
   }
-
   /* ── NOTES ── */
   .notes-text {
     font-size: 22px;
@@ -187,7 +166,6 @@
     white-space: pre-wrap;
     word-break: break-word;
   }
-
   /* ── YOUTUBE ── */
   .yt-body {
     flex: 1;
@@ -195,14 +173,12 @@
     overflow: hidden;
     background: #000;
   }
-
   .yt-body iframe {
     width: 100%;
     height: 100%;
     border: none;
     display: block;
   }
-
   .yt-placeholder {
     display: flex;
     flex-direction: column;
@@ -212,10 +188,8 @@
     color: #30363d;
     gap: 14px;
   }
-
   .yt-placeholder svg  { width: 52px; height: 52px; }
   .yt-placeholder span { font-size: 15px; font-weight: 500; }
-
   .yt-error-state {
     display: none;
     flex-direction: column;
@@ -226,16 +200,14 @@
     padding: 24px;
     text-align: center;
   }
-
   .yt-error-state .err-icon  { font-size: 32px; }
   .yt-error-state .err-title { font-size: 15px; font-weight: 700; color: #f85149; }
   .yt-error-state .err-sub   { font-size: 13px; color: #8b949e; }
 </style>
 </head>
 <body>
-
 <!-- HEADER: time/date + class color badge -->
-<div class="header">
+<div class="header" id="header">
   <div class="header-left">
     <div class="header-time" id="clock">--:-- --</div>
     <div class="header-date" id="date-display">Loading...</div>
@@ -246,24 +218,20 @@
     <span class="badge-time"   id="badge-time"></span>
   </div>
 </div>
-
 <!-- BODY: checklist top-left, video bottom-left, notes full-height right -->
 <div class="body">
-
   <div class="panel">
     <div class="panel-header">Assignment Completion Checklist</div>
     <div class="panel-body" id="checklist-display">
       <div class="checklist-empty">No checklist items yet.</div>
     </div>
   </div>
-
   <div class="panel panel-notes">
     <div class="panel-header">Assignment Notes</div>
     <div class="panel-body">
       <div class="notes-text" id="notes-display">No notes have been posted yet.</div>
     </div>
   </div>
-
   <div class="panel">
     <div class="yt-body">
       <div class="yt-placeholder" id="yt-placeholder">
@@ -282,12 +250,9 @@
         allowfullscreen></iframe>
     </div>
   </div>
-
 </div>
-
 <script>
 'use strict';
-
 // ─── SCHEDULE ─────────────────────────────────────────────────────────────────
 const PERIODS = [
   { n: 1, s: [8,50],  e: [9,50]  },
@@ -299,7 +264,6 @@ const PERIODS = [
   { n: 7, s: [13,50], e: [14,40] },
   { n: 8, s: [14,40], e: [15,30] },
 ];
-
 const SCHEDULE = {
   1: ['Red',   'Yellow', null,       null, null, 'Blue',  'Green',  'Purple'],  // Mon
   2: ['Red',   'Blue',   'Skills',   null, null, null,    'Green',  'Purple'],  // Tue
@@ -307,7 +271,6 @@ const SCHEDULE = {
   4: ['Red',   'Yellow', 'Skills',   null, null, 'Blue',  'Green',  'Purple'],  // Thu
   5: ['Blue',  'Yellow', 'CL Prep',  null, null, null,    'Green',  'Purple'],  // Fri
 };
-
 const COLOR_MAP = {
   'Red':     { bg: '#991b1b', fg: '#fff' },
   'Yellow':  { bg: '#92400e', fg: '#fff' },
@@ -317,18 +280,14 @@ const COLOR_MAP = {
   'Skills':  { bg: '#374151', fg: '#d1d5db' },
   'CL Prep': { bg: '#374151', fg: '#d1d5db' },
 };
-
-const NOCLASS = { bg: '#21262d', fg: '#7d8590' };
-
+const NOCLASS = { bg: '#161b22', fg: '#e6edf3' };
 // ─── HELPERS ──────────────────────────────────────────────────────────────────
 function toMin(h, m)   { return h * 60 + m; }
 function fmtTime(h, m) { return `${h % 12 || 12}:${String(m).padStart(2,'0')} ${h >= 12 ? 'PM' : 'AM'}`; }
 function esc(s)        { return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
-
 // ─── CLOCK ────────────────────────────────────────────────────────────────────
 const DAYS   = ['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
 const MONTHS = ['January','February','March','April','May','June','July','August','September','October','November','December'];
-
 function updateClock() {
   const now = new Date();
   const h = now.getHours(), m = now.getMinutes();
@@ -337,20 +296,21 @@ function updateClock() {
   document.getElementById('date-display').textContent =
     `${DAYS[now.getDay()]}, ${MONTHS[now.getMonth()]} ${now.getDate()}, ${now.getFullYear()}`;
 }
-
 // ─── CLASS BADGE ──────────────────────────────────────────────────────────────
 function updateClassBadge() {
-  const now    = new Date();
-  const dayIdx = now.getDay();
-  const curMin = toMin(now.getHours(), now.getMinutes());
-  const badge  = document.getElementById('class-badge');
+  const now      = new Date();
+  const dayIdx   = now.getDay();
+  const curMin   = toMin(now.getHours(), now.getMinutes());
+  const header   = document.getElementById('header');
   const periodEl = document.getElementById('badge-period');
   const nameEl   = document.getElementById('badge-name');
   const timeEl   = document.getElementById('badge-time');
 
+  // Apply color to the entire header
   function applyStyle(style) {
-    badge.style.backgroundColor = style.bg;
-    badge.style.color           = style.fg;
+    header.style.backgroundColor = style.bg;
+    header.style.color           = style.fg;
+    header.style.borderColor     = 'transparent';
   }
 
   if (!SCHEDULE[dayIdx]) {
@@ -360,7 +320,6 @@ function updateClassBadge() {
     timeEl.textContent   = '';
     return;
   }
-
   let slot = null;
   for (let i = 0; i < PERIODS.length; i++) {
     const p = PERIODS[i];
@@ -370,7 +329,6 @@ function updateClassBadge() {
       break;
     }
   }
-
   if (!slot) {
     applyStyle(NOCLASS);
     periodEl.textContent = '—';
@@ -378,35 +336,28 @@ function updateClassBadge() {
     timeEl.textContent   = '';
     return;
   }
-
   const { period, color, endMin } = slot;
   periodEl.textContent = `Period ${period.n}`;
   timeEl.textContent   = `${fmtTime(...period.s)} – ${fmtTime(...period.e)}`;
-
   if (!color) {
     applyStyle(NOCLASS);
     nameEl.textContent = 'Free';
     return;
   }
-
   applyStyle(COLOR_MAP[color] || NOCLASS);
   nameEl.textContent = (color === 'Skills' || color === 'CL Prep') ? color : `${color} Class`;
 }
-
 // ─── DATA POLLING ─────────────────────────────────────────────────────────────
 let lastVideoId = null;
-
 function loadDashboard() {
   let data = { notes: '', checklist: [], youtubeId: null };
   try {
     const raw = localStorage.getItem('cs_dashboard_data');
     if (raw) data = JSON.parse(raw);
   } catch(e) {}
-
   // Notes
   document.getElementById('notes-display').textContent =
     (data.notes && data.notes.trim()) ? data.notes : 'No notes have been posted yet.';
-
   // Checklist
   const listEl = document.getElementById('checklist-display');
   if (!data.checklist || data.checklist.length === 0) {
@@ -423,7 +374,6 @@ function loadDashboard() {
       </div>
     `).join('');
   }
-
   // YouTube — only update src when ID changes to avoid interrupting playback
   const newId = data.youtubeId || null;
   if (newId !== lastVideoId) {
@@ -444,16 +394,13 @@ function loadDashboard() {
     }
   }
 }
-
 // ─── INIT ─────────────────────────────────────────────────────────────────────
 updateClock();
 updateClassBadge();
 loadDashboard();
-
 setInterval(updateClock,        1000);
 setInterval(updateClassBadge,  30000);
 setInterval(loadDashboard,      5000);
-
 // YouTube embed error detection
 window.addEventListener('message', function(e) {
   if (!e.data || typeof e.data !== 'string') return;
