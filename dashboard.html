@@ -49,7 +49,6 @@
     color: inherit;
     opacity: 0.75;
   }
-  /* Class badge — sits inside the colored header */
   .class-badge {
     border-radius: 8px;
     padding: 8px 28px;
@@ -89,7 +88,6 @@
     flex: 1;
     min-height: 0;
   }
-  /* ── SHARED PANEL ── */
   .panel {
     background: #161b22;
     border: 1px solid #30363d;
@@ -98,7 +96,6 @@
     display: flex;
     flex-direction: column;
   }
-  /* Notes spans both rows in the right column */
   .panel-notes {
     grid-column: 2;
     grid-row: 1 / 3;
@@ -123,10 +120,7 @@
   .panel-body::-webkit-scrollbar-track { background: transparent; }
   .panel-body::-webkit-scrollbar-thumb { background: #30363d; border-radius: 2px; }
   /* ── CHECKLIST ── */
-  .checklist-empty {
-    color: #7d8590;
-    font-size: 15px;
-  }
+  .checklist-empty { color: #7d8590; font-size: 15px; }
   .checklist-item {
     display: flex;
     align-items: flex-start;
@@ -150,14 +144,8 @@
     justify-content: center;
     transition: background 0.2s, border-color 0.2s;
   }
-  .checklist-item.done .check-circle {
-    background: #238636;
-    border-color: #238636;
-  }
-  .checklist-item.done .item-text {
-    text-decoration: line-through;
-    color: #7d8590;
-  }
+  .checklist-item.done .check-circle { background: #238636; border-color: #238636; }
+  .checklist-item.done .item-text { text-decoration: line-through; color: #7d8590; }
   /* ── NOTES ── */
   .notes-text {
     font-size: 22px;
@@ -167,18 +155,8 @@
     word-break: break-word;
   }
   /* ── YOUTUBE ── */
-  .yt-body {
-    flex: 1;
-    position: relative;
-    overflow: hidden;
-    background: #000;
-  }
-  .yt-body iframe {
-    width: 100%;
-    height: 100%;
-    border: none;
-    display: block;
-  }
+  .yt-body { flex: 1; position: relative; overflow: hidden; background: #000; }
+  .yt-body iframe { width: 100%; height: 100%; border: none; display: block; }
   .yt-placeholder {
     display: flex;
     flex-direction: column;
@@ -206,19 +184,19 @@
 </style>
 </head>
 <body>
-<!-- HEADER: time/date + class color badge -->
+
 <div class="header" id="header">
   <div class="header-left">
     <div class="header-time" id="clock">--:-- --</div>
     <div class="header-date" id="date-display">Loading...</div>
   </div>
-  <div class="class-badge" id="class-badge">
+  <div class="class-badge">
     <span class="badge-period" id="badge-period">—</span>
     <span class="badge-name"   id="badge-name">—</span>
     <span class="badge-time"   id="badge-time"></span>
   </div>
 </div>
-<!-- BODY: checklist top-left, video bottom-left, notes full-height right -->
+
 <div class="body">
   <div class="panel">
     <div class="panel-header">Assignment Completion Checklist</div>
@@ -251,133 +229,137 @@
     </div>
   </div>
 </div>
+
 <script>
 'use strict';
+
 // ─── SCHEDULE ─────────────────────────────────────────────────────────────────
 const PERIODS = [
-  { n: 1, s: [8,50],  e: [9,50]  },
-  { n: 2, s: [9,50],  e: [10,40] },
-  { n: 3, s: [10,40], e: [11,30] },
-  { n: 4, s: [11,30], e: [12,20] },
-  { n: 5, s: [12,20], e: [13,0]  },
-  { n: 6, s: [13,0],  e: [13,50] },
-  { n: 7, s: [13,50], e: [14,40] },
-  { n: 8, s: [14,40], e: [15,30] },
+  { n:1, s:[8,50],  e:[9,50]  },
+  { n:2, s:[9,50],  e:[10,40] },
+  { n:3, s:[10,40], e:[11,30] },
+  { n:4, s:[11,30], e:[12,20] },
+  { n:5, s:[12,20], e:[13,0]  },
+  { n:6, s:[13,0],  e:[13,50] },
+  { n:7, s:[13,50], e:[14,40] },
+  { n:8, s:[14,40], e:[15,30] },
 ];
 const SCHEDULE = {
-  1: ['Red',   'Yellow', null,       null, null, 'Blue',  'Green',  'Purple'],  // Mon
-  2: ['Red',   'Blue',   'Skills',   null, null, null,    'Green',  'Purple'],  // Tue
-  3: ['Red',   'Yellow', 'CL Prep',  null, null, null,    null,     null    ],  // Wed
-  4: ['Red',   'Yellow', 'Skills',   null, null, 'Blue',  'Green',  'Purple'],  // Thu
-  5: ['Blue',  'Yellow', 'CL Prep',  null, null, null,    'Green',  'Purple'],  // Fri
+  1: ['Red',   'Yellow', null,      null, null, 'Blue', 'Green',  'Purple'],
+  2: ['Red',   'Blue',   'Skills',  null, null, null,   'Green',  'Purple'],
+  3: ['Red',   'Yellow', 'CL Prep', null, null, null,   null,     null    ],
+  4: ['Red',   'Yellow', 'Skills',  null, null, 'Blue', 'Green',  'Purple'],
+  5: ['Blue',  'Yellow', 'CL Prep', null, null, null,   'Green',  'Purple'],
 };
 const COLOR_MAP = {
-  'Red':     { bg: '#991b1b', fg: '#fff' },
-  'Yellow':  { bg: '#92400e', fg: '#fff' },
-  'Blue':    { bg: '#1e40af', fg: '#fff' },
-  'Green':   { bg: '#166534', fg: '#fff' },
-  'Purple':  { bg: '#5b21b6', fg: '#fff' },
-  'Skills':  { bg: '#374151', fg: '#d1d5db' },
-  'CL Prep': { bg: '#374151', fg: '#d1d5db' },
+  'Red':     { bg:'#991b1b', fg:'#fff' },
+  'Yellow':  { bg:'#92400e', fg:'#fff' },
+  'Blue':    { bg:'#1e40af', fg:'#fff' },
+  'Green':   { bg:'#166534', fg:'#fff' },
+  'Purple':  { bg:'#5b21b6', fg:'#fff' },
+  'Skills':  { bg:'#374151', fg:'#d1d5db' },
+  'CL Prep': { bg:'#374151', fg:'#d1d5db' },
 };
-const NOCLASS = { bg: '#161b22', fg: '#e6edf3' };
-// ─── HELPERS ──────────────────────────────────────────────────────────────────
-function toMin(h, m)   { return h * 60 + m; }
-function esc(s)        { return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
-// ─── CLOCK ────────────────────────────────────────────────────────────────────
+const NOCLASS = { bg:'#161b22', fg:'#e6edf3' };
+
+const toMin = (h, m) => h * 60 + m;
+const pad   = n => String(n).padStart(2, '0');
+const esc   = s => String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+
 const DAYS   = ['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
 const MONTHS = ['January','February','March','April','May','June','July','August','September','October','November','December'];
-function updateClock() {
-  const now = new Date();
-  const h = now.getHours(), m = now.getMinutes();
-  document.getElementById('clock').textContent =
-    `${h % 12 || 12}:${String(m).padStart(2,'0')} ${h >= 12 ? 'PM' : 'AM'}`;
-  document.getElementById('date-display').textContent =
-    `${DAYS[now.getDay()]}, ${MONTHS[now.getMonth()]} ${now.getDate()}, ${now.getFullYear()}`;
-}
-// ─── CLASS BADGE ──────────────────────────────────────────────────────────────
-function updateClassBadge() {
-  const now      = new Date();
-  const dayIdx   = now.getDay();
-  const curMin   = toMin(now.getHours(), now.getMinutes());
-  const header   = document.getElementById('header');
-  const periodEl = document.getElementById('badge-period');
-  const nameEl   = document.getElementById('badge-name');
 
-  function applyStyle(style) {
-    header.style.backgroundColor = style.bg;
-    header.style.color           = style.fg;
-    header.style.borderColor     = 'transparent';
-  }
+// DOM refs cached once
+const elClock    = document.getElementById('clock');
+const elDate     = document.getElementById('date-display');
+const elHeader   = document.getElementById('header');
+const elPeriod   = document.getElementById('badge-period');
+const elName     = document.getElementById('badge-name');
+const elTime     = document.getElementById('badge-time');
 
-  if (!SCHEDULE[dayIdx]) {
-    applyStyle(NOCLASS);
-    periodEl.textContent = 'Weekend';
-    nameEl.textContent   = 'No School';
-    return;
-  }
-  let slot = null;
-  for (let i = 0; i < PERIODS.length; i++) {
-    const p = PERIODS[i];
-    const s = toMin(...p.s), e = toMin(...p.e);
-    if (curMin >= s && curMin < e) {
-      slot = { period: p, color: SCHEDULE[dayIdx][i] };
-      break;
-    }
-  }
-  if (!slot) {
-    applyStyle(NOCLASS);
-    periodEl.textContent = '—';
-    nameEl.textContent   = 'No Class';
-    return;
-  }
-  const { period, color } = slot;
-  periodEl.textContent = `Period ${period.n}`;
-  if (!color) {
-    applyStyle(NOCLASS);
-    nameEl.textContent = 'Free';
-    return;
-  }
-  applyStyle(COLOR_MAP[color] || NOCLASS);
-  nameEl.textContent = (color === 'Skills' || color === 'CL Prep') ? color : `${color} Class`;
-}
-// ─── COUNTDOWN ────────────────────────────────────────────────────────────────
-function updateCountdown() {
+let lastPeriodKey = null;
+
+// ─── SINGLE TICK — runs every second ─────────────────────────────────────────
+function tick() {
   const now    = new Date();
+  const h      = now.getHours();
+  const m      = now.getMinutes();
+  const s      = now.getSeconds();
   const dayIdx = now.getDay();
-  const curMin = toMin(now.getHours(), now.getMinutes());
-  const curSec = now.getSeconds();
-  const timeEl = document.getElementById('badge-time');
+  const curMin = toMin(h, m);
 
-  if (!SCHEDULE[dayIdx]) { timeEl.textContent = ''; return; }
+  // ── Clock
+  elClock.textContent = `${h % 12 || 12}:${pad(m)}:${pad(s)} ${h >= 12 ? 'PM' : 'AM'}`;
+  elDate.textContent  = `${DAYS[dayIdx]}, ${MONTHS[now.getMonth()]} ${now.getDate()}, ${now.getFullYear()}`;
 
-  for (let i = 0; i < PERIODS.length; i++) {
-    const p = PERIODS[i];
-    const s = toMin(...p.s), e = toMin(...p.e);
-    if (curMin >= s && curMin < e) {
-      const totalSecs = (e - curMin) * 60 - curSec;
-      const mins = Math.floor(totalSecs / 60);
-      const secs = totalSecs % 60;
-      timeEl.textContent = `${mins}:${String(secs).padStart(2,'0')} remaining`;
-      return;
+  // ── Find current period (one pass, shared by badge + countdown)
+  const sched = SCHEDULE[dayIdx];
+  let slot = null;
+  if (sched) {
+    for (let i = 0; i < PERIODS.length; i++) {
+      const p  = PERIODS[i];
+      const ps = toMin(...p.s);
+      const pe = toMin(...p.e);
+      if (curMin >= ps && curMin < pe) {
+        slot = { period: p, color: sched[i], endMin: pe };
+        break;
+      }
     }
   }
-  timeEl.textContent = '';
+
+  // ── Badge + header color (only touches DOM when period actually changes)
+  const periodKey = slot ? `${slot.period.n}|${slot.color}` : (sched ? 'noclass' : 'weekend');
+  if (periodKey !== lastPeriodKey) {
+    lastPeriodKey = periodKey;
+    if (!sched) {
+      applyStyle(NOCLASS);
+      elPeriod.textContent = 'Weekend';
+      elName.textContent   = 'No School';
+    } else if (!slot) {
+      applyStyle(NOCLASS);
+      elPeriod.textContent = '—';
+      elName.textContent   = 'No Class';
+    } else {
+      elPeriod.textContent = `Period ${slot.period.n}`;
+      if (!slot.color) {
+        applyStyle(NOCLASS);
+        elName.textContent = 'Free';
+      } else {
+        applyStyle(COLOR_MAP[slot.color] || NOCLASS);
+        elName.textContent = (slot.color === 'Skills' || slot.color === 'CL Prep')
+          ? slot.color : `${slot.color} Class`;
+      }
+    }
+  }
+
+  // ── Countdown (always recalculated from same slot — no separate interval)
+  if (slot) {
+    const totalSecs = (slot.endMin - curMin) * 60 - s;
+    elTime.textContent = `${Math.floor(totalSecs / 60)}:${pad(totalSecs % 60)} remaining`;
+  } else {
+    elTime.textContent = '';
+  }
 }
+
+function applyStyle(style) {
+  elHeader.style.backgroundColor = style.bg;
+  elHeader.style.color           = style.fg;
+  elHeader.style.borderColor     = 'transparent';
+}
+
 // ─── DATA POLLING ─────────────────────────────────────────────────────────────
 let lastVideoId = null;
+
 function loadDashboard() {
-  let data = { notes: '', checklist: [], youtubeId: null };
+  let data = { notes:'', checklist:[], youtubeId:null };
   try {
     const raw = localStorage.getItem('cs_dashboard_data');
     if (raw) data = JSON.parse(raw);
   } catch(e) {}
 
-  // Notes
   document.getElementById('notes-display').textContent =
     (data.notes && data.notes.trim()) ? data.notes : 'No notes have been posted yet.';
 
-  // Checklist
   const listEl = document.getElementById('checklist-display');
   if (!data.checklist || data.checklist.length === 0) {
     listEl.innerHTML = '<div class="checklist-empty">No checklist items yet.</div>';
@@ -385,16 +367,13 @@ function loadDashboard() {
     listEl.innerHTML = data.checklist.map(item => `
       <div class="checklist-item${item.done ? ' done' : ''}">
         <div class="check-circle">
-          ${item.done
-            ? '<svg width="12" height="12" viewBox="0 0 24 24" fill="white"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/></svg>'
-            : ''}
+          ${item.done ? '<svg width="12" height="12" viewBox="0 0 24 24" fill="white"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/></svg>' : ''}
         </div>
         <span class="item-text">${esc(item.text)}</span>
       </div>
     `).join('');
   }
 
-  // YouTube — only update src when ID changes to avoid interrupting playback
   const newId = data.youtubeId || null;
   if (newId !== lastVideoId) {
     lastVideoId = newId;
@@ -414,18 +393,14 @@ function loadDashboard() {
     }
   }
 }
+
 // ─── INIT ─────────────────────────────────────────────────────────────────────
-updateClock();
-updateClassBadge();
-updateCountdown();
+tick();
 loadDashboard();
 
-setInterval(updateClock,       1000);
-setInterval(updateCountdown,   1000);
-setInterval(updateClassBadge, 30000);
-setInterval(loadDashboard,     5000);
+setInterval(tick,          1000);
+setInterval(loadDashboard, 5000);
 
-// YouTube embed error detection
 window.addEventListener('message', function(e) {
   if (!e.data || typeof e.data !== 'string') return;
   try {
