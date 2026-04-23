@@ -338,7 +338,7 @@ function updateClassBadge() {
   }
   const { period, color, endMin } = slot;
   periodEl.textContent = `Period ${period.n}`;
-  timeEl.textContent   = `${fmtTime(...period.s)} – ${fmtTime(...period.e)}`;
+  timeEl.textContent   = ''; // filled each second by updateCountdown
   if (!color) {
     applyStyle(NOCLASS);
     nameEl.textContent = 'Free';
@@ -346,6 +346,29 @@ function updateClassBadge() {
   }
   applyStyle(COLOR_MAP[color] || NOCLASS);
   nameEl.textContent = (color === 'Skills' || color === 'CL Prep') ? color : `${color} Class`;
+}
+// ─── COUNTDOWN ────────────────────────────────────────────────────────────────
+function updateCountdown() {
+  const now    = new Date();
+  const dayIdx = now.getDay();
+  const curMin = toMin(now.getHours(), now.getMinutes());
+  const curSec = now.getSeconds();
+  const timeEl = document.getElementById('badge-time');
+
+  if (!SCHEDULE[dayIdx]) { timeEl.textContent = ''; return; }
+
+  for (let i = 0; i < PERIODS.length; i++) {
+    const p = PERIODS[i];
+    const s = toMin(...p.s), e = toMin(...p.e);
+    if (curMin >= s && curMin < e) {
+      const totalSecs = (e - curMin) * 60 - curSec;
+      const mins = Math.floor(totalSecs / 60);
+      const secs = totalSecs % 60;
+      timeEl.textContent = `${mins}:${String(secs).padStart(2,'0')} remaining`;
+      return;
+    }
+  }
+  timeEl.textContent = '';
 }
 // ─── DATA POLLING ─────────────────────────────────────────────────────────────
 let lastVideoId = null;
@@ -397,8 +420,10 @@ function loadDashboard() {
 // ─── INIT ─────────────────────────────────────────────────────────────────────
 updateClock();
 updateClassBadge();
+updateCountdown();
 loadDashboard();
 setInterval(updateClock,        1000);
+setInterval(updateCountdown,   1000);
 setInterval(updateClassBadge,  30000);
 setInterval(loadDashboard,      5000);
 // YouTube embed error detection
