@@ -643,10 +643,14 @@ function addItem() {
 }
 
 function saveChecklist() {
-  const d = getData();
-  d.checklist = items;
-  putData(d);
-  toast('Checklist saved!');
+  try {
+    const d = getData();
+    d.checklist = items;
+    putData(d);
+    toast('Checklist saved!');
+  } catch(e) {
+    toast('⚠ Save failed: ' + (e.message || e));
+  }
 }
 
 // ─── YOUTUBE ──────────────────────────────────────────────────────────────────
