@@ -401,6 +401,11 @@ loadDashboard();
 setInterval(tick,          1000);
 setInterval(loadDashboard, 5000);
 
+// Instant update when admin saves from another tab (same browser, same origin)
+window.addEventListener('storage', function(e) {
+  if (e.key === 'cs_dashboard_data') loadDashboard();
+});
+
 window.addEventListener('message', function(e) {
   if (!e.data || typeof e.data !== 'string') return;
   try {
